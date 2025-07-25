@@ -1,97 +1,79 @@
-const express = require('express');
+const AWS = require('aws-sdk');
 const sharp = require('sharp');
 const { v4: uuidv4 } = require('uuid');
 const fs = require('fs');
 const path = require('path');
-const os = require('os');
-const cors=require('cors');
-const app = express();
-app.use(cors());
-const PORT = 3000;
-const OUTPUT_DIR = path.join(__dirname, 'uploads');
 
-if (!fs.existsSync(OUTPUT_DIR)) fs.mkdirSync(OUTPUT_DIR);
+// Initialize S3
+const s3 = new AWS.S3();
+const BUCKET_NAME = 'pawnhourlyroutine'; 
 
-// // Load SVG template once
-// const svgPath = path.join(__dirname, `svgs/Pawn${platform}.svg`);
-// const rawSvgTemplate = fs.readFileSync(svgPath, 'utf8');
-
-// Parse JSON body
-app.use(express.json());
-
-/**
- * Replace placeholders in the SVG string.
- */
+// Fill placeholders in SVG
 function fillSvgPlaceholders(svgContent, replacements) {
   return svgContent.replace(/\{\{(.*?)\}\}/g, (_, key) => {
     const trimmedKey = key.trim();
+
     if (trimmedKey in replacements) {
-      return replacements[trimmedKey];
+      let value = replacements[trimmedKey];
+
+      if (trimmedKey === "TX_HASH" && typeof value === "string" && value.length > 40) {
+        value = `${value.slice(0, 20)} ... ${value.slice(-20)}`;
+      }
+
+      return value;
     } else {
-      console.warn(`⚠️ No replacement found for placeholder: {{${trimmedKey}}}`);
-      return `{{${trimmedKey}}}`; // Leave untouched
+      return `{{${trimmedKey}}}`;
     }
   });
 }
-app.get('/', (req, res) => {
-  res.send('Welcome to the SVG to JPEG conversion service!');
-});
-// Endpoint
-app.post('/svg-to-jpeg', async (req, res) => {
+
+// Lambda Handler
+exports.handler = async (event) => {
   try {
-    console.log('Received request to /svg-to-jpeg');
-    console.log('Request body:', req.body);
+    const body = JSON.parse(event.body || '{}');
+    const { platforms, ...replacements } = body;
 
-    const { platform, ...replacements } = req.body;
-
-    if (!platform || typeof replacements !== 'object') {
-      return res.status(400).json({ error: 'Missing platform or invalid replacement object' });
+    if (!Array.isArray(platforms) || platforms.length === 0) {
+      return { statusCode: 400, body: JSON.stringify({ error: 'Missing or invalid platforms array' }) };
     }
 
-    const svgPath = path.join(__dirname, `svgs/Pawn${platform}.svg`);
+    for (const platform of platforms) {
+      const platformName = platform.name;
+      const svgPath = path.join(__dirname, 'svgs', `Pawn${platformName}.svg`);
 
-    if (!fs.existsSync(svgPath)) {
-      return res.status(404).json({ error: `SVG template not found for platform: ${platform}` });
+      if (!fs.existsSync(svgPath)) {
+        console.warn(`SVG not found for ${platformName}`);
+        platform.url = null;
+        continue;
+      }
+
+      const rawSvg = fs.readFileSync(svgPath, 'utf8');
+      const filledSvg = fillSvgPlaceholders(rawSvg, replacements);
+      const buffer = await sharp(Buffer.from(filledSvg)).jpeg({ quality: 90 }).toBuffer();
+
+      const fileKey = `generated/${uuidv4()}-${platformName}.jpeg`;
+
+      await s3.putObject({
+        Bucket: BUCKET_NAME,
+        Key: fileKey,
+        Body: buffer,
+        ContentType: 'image/jpeg',
+        ACL: 'public-read' 
+      }).promise();
+
+      platform.url = `https://${BUCKET_NAME}.s3.amazonaws.com/${fileKey}`;
     }
 
-    const rawSvgTemplate = fs.readFileSync(svgPath, 'utf8');
-    const filledSvg = fillSvgPlaceholders(rawSvgTemplate, replacements);
-
-    const filename = `${uuidv4()}.jpeg`;
-    const filepath = path.join(OUTPUT_DIR, filename);
-
-    await sharp(Buffer.from(filledSvg))
-      .jpeg({ quality: 90 })
-      .toFile(filepath);
-
-    const fileUrl = `https://image-to-jpeg-vl1x.onrender.com/uploads/${filename}`;
-    res.json({ url: fileUrl });
+    return {
+      statusCode: 200,
+      body: JSON.stringify(body),
+    };
 
   } catch (err) {
-    console.error('Conversion error:', err);
-    res.status(500).json({ error: 'Failed to convert SVG to JPEG' });
+    console.error(err);
+    return {
+      statusCode: 500,
+      body: JSON.stringify({ error: 'Failed to process request' }),
+    };
   }
-});
-
-
-
-// Static file serving
-app.use('/uploads', express.static(OUTPUT_DIR));
-
-function getLocalIp() {
-  const interfaces = os.networkInterfaces();
-  for (const name of Object.keys(interfaces)) {
-    for (const iface of interfaces[name]) {
-      if (iface.family === 'IPv4' && !iface.internal) {
-        return iface.address;
-      }
-    }
-  }
-  return '127.0.0.1';
-}
-
-app.listen(PORT, () => {
-  const localIp = getLocalIp();
-  console.log(`Server running at http://localhost:${PORT}`);
-  console.log(`Accessible locally at http://${localIp}:${PORT}`);
-});
+};

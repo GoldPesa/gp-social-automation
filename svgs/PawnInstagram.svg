@@ -17,7 +17,7 @@
 <path d="M711.64 84.9751C711.932 85.4602 712.339 85.8665 712.824 86.1585C713.309 86.4506 713.858 86.6195 714.424 86.6507H719.524C720.567 86.6507 721.013 85.8999 720.515 84.9858L703.337 53.382C703.039 52.8989 702.628 52.4951 702.14 52.205C701.652 51.9149 701.101 51.747 700.535 51.7158H695.147C694.581 51.7475 694.03 51.9155 693.542 52.2056C693.054 52.4956 692.644 52.8992 692.345 53.382L675.167 84.986C674.669 85.9026 675.115 86.6509 676.158 86.6509H681.026C681.592 86.6196 682.143 86.4512 682.63 86.1602C683.116 85.8693 683.526 85.4645 683.822 84.9806L696.951 60.5804C697.446 59.6609 698.249 59.6638 698.737 60.5871L711.64 84.9751Z" fill="black"/>
 </g>
 <rect x="-6.52593" y="165.474" width="1103.05" height="116.052" fill="white" stroke="#9E9E9E" stroke-width="0.948148"/>
-<text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="52" letter-spacing="0em"><tspan x="120" y="243.698">Pawn BuyBack:{{PAWN_BUYBACK}} </tspan></text>
+<text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="52" letter-spacing="0em"><tspan x="120" y="243.698">Pawn BuyBack: ${{PAWN_BUYBACK}} </tspan></text>
 <rect x="-6.52593" y="1068.47" width="1092.05" height="116.052" fill="white" stroke="#9E9E9E" stroke-width="0.948148"/>
 <text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="35" letter-spacing="0em"><tspan x="135.453" y="1140.01">Tx Hash:</tspan></text>
 <text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="25" letter-spacing="0em"><tspan x="345.453" y="1136.62">{{TX_HASH}}</tspan></text>

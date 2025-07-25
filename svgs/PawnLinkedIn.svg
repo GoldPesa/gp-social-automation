@@ -3,7 +3,7 @@
 <rect width="1080" height="1080" fill="#D9D9D9"/>
 <rect x="323.75" y="88.75" width="432.5" height="873.5" fill="#C8C8C8" stroke="#9E9E9E" stroke-width="1.5"/>
 <rect x="-11.5259" y="102.474" width="1103.05" height="116.052" fill="white" stroke="#9E9E9E" stroke-width="0.948148"/>
-<text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="52" letter-spacing="0em"><tspan x="120" y="180.698">Pawn BuyBack: {{PAWN_BUYBACK}}</tspan></text>
+<text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="52" letter-spacing="0em"><tspan x="120" y="180.698">Pawn BuyBack: ${{PAWN_BUYBACK}}</tspan></text>
 <rect x="-6.52593" y="963.474" width="1092.05" height="116.052" fill="white" stroke="#9E9E9E" stroke-width="0.948148"/>
 <text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="35" letter-spacing="0em"><tspan x="135.453" y="1035.01">Tx Hash:</tspan></text>
 <text fill="#1B1B1B" xml:space="preserve" style="white-space: pre" font-family="Roboto Mono" font-size="25" letter-spacing="0em"><tspan x="345.453" y="1031.62">{{TX_HASH}}</tspan></text>
